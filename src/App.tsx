@@ -1,26 +1,43 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
 import './App.css';
 
 function App() {
+
+    const [todoList, setTodoList] = useState([]);
+
+    const todos: Todo[] = [
+        {
+            text: 'vásárlás',
+            active: true
+        },
+        {
+            text: 'mosogatás',
+            active: false
+        }
+    ]
+
+    const oneTodo: Todo = {
+        text: 'mosás',
+        active: true
+    }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <>
+        <div className="App">
+            <h2>Todo list</h2>
+            {todos.map(todo => {
+                return (
+                    <p>{todo.text}</p>
+                )
+            })}
+        </div>
+      </>
   );
 }
 
 export default App;
+
+export interface Todo {
+    text: string;
+    active: boolean
+}
