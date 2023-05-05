@@ -3,8 +3,45 @@ import './App.css';
 
 function App() {
 
-    const [todoList, setTodoList] = useState([]);
+    let addNewTodoButtonText: string = 'Feladat hozzáadása';
 
+    return (
+        <>
+            <div className="App">
+                <h2>Todo list</h2>
+                <CheckList />
+                <Button buttonText={addNewTodoButtonText} />
+            </div>
+        </>
+    );
+}
+
+export function CheckList(): JSX.Element{
+
+    function handleCheckboxActiveState() {}
+
+    return (
+        <>
+            {GetDataFromDb().map(todo => {
+                return (
+                    <>
+                        <input type="checkbox"
+                               checked={todo.active}
+                               onClick={() => handleCheckboxActiveState}
+                        />
+                        <p>{todo.text}</p>
+                    </>
+                )
+            })}
+        </>
+    )
+}
+
+function GetDataFromDb(): Todo[] {
+
+    const [todoList, setTodoList] = useState<Todo[]>([]);
+
+    // todoList litát a DataConnection-ből kell feltölteni adattal, setTodoList
     const todos: Todo[] = [
         {
             text: 'vásárlás',
@@ -15,24 +52,17 @@ function App() {
             active: false
         }
     ]
+    return (
+        todos
+    )
+}
 
-    const oneTodo: Todo = {
-        text: 'mosás',
-        active: true
-    }
-
-  return (
-      <>
-        <div className="App">
-            <h2>Todo list</h2>
-            {todos.map(todo => {
-                return (
-                    <p>{todo.text}</p>
-                )
-            })}
-        </div>
-      </>
-  );
+export function Button(props: { buttonText: string }): JSX.Element {
+    return (
+        <button>
+            {props.buttonText}
+        </button>
+    )
 }
 
 export default App;
