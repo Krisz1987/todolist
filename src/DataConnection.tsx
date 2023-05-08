@@ -1,8 +1,9 @@
 import {Todo} from "./App";
 
-let counter: number = 0;
-
 export class DataConnection {
+
+    counter: number = 0;
+    todoId: number = 3;
 
     /*todos: Todo[] = [
         {
@@ -18,21 +19,49 @@ export class DataConnection {
             complete: true
         }
     ]*/
-    todos: Todo[] = [];
-
-    constructor() {}
-
-    async getData(isError: boolean = false) {
-        counter++;
-        if (counter % 10 === 0 || isError) {
-            throw new Error("Adatbázis kapcsolati hiba!")
+    todos: Todo[] = [
+        {
+            id: 1,
+            text: 'vásárlás',
+            complete: true
+        },
+        {
+            id: 2,
+            text: 'mosogatás',
+            complete: false
+        },
+        {
+            id: 3,
+            text: 'főzés',
+            complete: true
         }
+    ];
+
+    async getTodoList() {
+        //this.randomError();
         return this.todos;
     }
 
-    async addData(todo: Todo) {
-        this.todos.push(todo);
+    async addNewTodo(todoText: string) {
+        //this.randomError();
+        this.todoId++;
+        this.todos.push({id: this.todoId, text: todoText, complete: false});
         console.log(this.todos)
+    }
+
+    setTodoToComplete(todoId: number) {
+        this.todos.map((todo) => {
+            if (todo.id === todoId) {
+                todo.complete = true;
+            }
+        })
+    }
+
+    private randomError(): void {
+        this.counter++;
+        if (this.counter % 5 === 0) {
+            throw new Error("Adatbázis kapcsolati hiba!")
+        }
     }
 
 }

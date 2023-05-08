@@ -2,74 +2,73 @@ import React, {useState, useEffect, ChangeEvent} from 'react';
 import './App.css';
 import {DataConnection} from "./DataConnection";
 
+const dataConnection = new DataConnection();
 
 function App() {
 
     const [todoList, setTodoList] = useState<Todo[]>([]);
-    const [loaded, setLoaded] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [openModal, setOpenModal] = useState(false);
-    const [inputText, setInputText] = useState("");
-
-    const dataConnection = new DataConnection();
 
     useEffect(() => {
-        dataConnection.getData().then((result: any) => {
-            setTodoList(result);
-            setLoaded(true);
+        loadTodoList();
+    }, []);
+
+    loadTodoList();
+    function loadTodoList(): void {
+        dataConnection.getTodoList().then((result: any) => {
+            //setTodoList(result);
+            setTodoList([...todoList, result]);
+            setLoading(false);
         }).catch((error: string) => {
             alert(error)
         })
-    }, []);
+    }
 
     let addNewTodoButtonText: string = 'Feladat hozzáadása';
-    let errorButtonText: string = 'Hiba!'
-    let addNewTodoOkButtonText: string = 'OK';
 
-    function addTodoClick() {
+    function addTodoClick(): void {
         setOpenModal(true);
     }
 
-    function closeModal() {
-        let newTodo: Todo = {
-            text: inputText,
-            complete: false
-        }
-        dataConnection.addData(newTodo);
-        const newTodoList = [...todoList, newTodo];
-        setTodoList(newTodoList);
+    function closeModal(): void {
         setOpenModal(false);
     }
 
-    const newTodoInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setInputText(e.target.value);
+    function onSuccessfulSave(): void {
+        setOpenModal(false);
+        loadTodoList();
     }
 
-    function errorClick() {
-        dataConnection.getData(true).then(result => {
-        }).catch(error => {
-            alert(error)
-        })
+    function loadingDiv() {
+        return <div>Töltődik...</div>
+    }
+
+    function todoApplication() {
+        function showModal() {
+            return openModal ? <Modal onSuccessfulSave={onSuccessfulSave}
+            /> : <></>
+        }
+
+        return <div className="App">
+            <h2>Todo list</h2>
+            <CheckList todoList={todoList}/>
+            <Button buttonText={addNewTodoButtonText} onClick={addTodoClick}/>
+            {showModal()}
+        </div>
     }
 
     return (
         <>
-            {!loaded ? <div>Töltődik...</div> :
-                <div className="App">
-                    <h2>Todo list</h2>
-                    <CheckList todoList={todoList}/>
-                    <Button buttonText={addNewTodoButtonText} onClick={addTodoClick}/>
-                    <Button buttonText={errorButtonText} onClick={errorClick}/>
-                    <Modal open={openModal} newTodoInputChange={newTodoInputChange}
-                           buttonFunction={closeModal} addNewTodoOkButtonText={addNewTodoOkButtonText}/>
-                </div>
-            }
+            {loading ? loadingDiv() : todoApplication()}
         </>
     );
 }
 
 export function CheckList(props: { todoList: Todo[] }): JSX.Element {
 
-    function handleCheckboxActiveState() {
+    function handleCheckboxActiveState(id: number) {
+        dataConnection.setTodoToComplete(id)
     }
 
     return (
@@ -86,14 +85,13 @@ export function CheckList(props: { todoList: Todo[] }): JSX.Element {
                                 <td>
                                     <input type="checkbox"
                                            checked={todo.complete}
-                                           onClick={() => handleCheckboxActiveState}
+                                           onClick={() => handleCheckboxActiveState(todo.id)}
                                     />
                                 </td>
                                 <td>
                                     <p>{todo.text}</p>
                                 </td>
                             </tr>
-
                         </>
                     )
                 })}
@@ -110,16 +108,31 @@ export function Button(props: { buttonText: string, onClick: any }): JSX.Element
     )
 }
 
-export function Modal(props: {open: boolean, newTodoInputChange: any, buttonFunction: any, addNewTodoOkButtonText: string}):JSX.Element {
+export function Modal(props: { onSuccessfulSave: any }): JSX.Element {
 
-    if (!props.open) {
-        return <></>;
+    const [inputText, setInputText] = useState("");
+    const getTextFromInput = (e: ChangeEvent<HTMLInputElement>) => {
+        setInputText(e.target.value);
     }
+
+    function okClick() {
+        console.log("OK click")
+        dataConnection.addNewTodo(inputText).then(() => {
+            {props.onSuccessfulSave()}
+        }).catch(error => {
+            alert(error);
+        });
+    }
+
+    /*if (!props.open) {
+        return <></>;
+    }*/
+
     return (
         <div>
             <label>Új feladat: </label>
-            <input type='text' onChange={props.newTodoInputChange} />
-            <Button buttonText={props.addNewTodoOkButtonText} onClick={props.buttonFunction} />
+            <input type='text' onChange={getTextFromInput}/>
+            <Button buttonText='OK' onClick={okClick}/>
         </div>
     )
 }
@@ -127,6 +140,7 @@ export function Modal(props: {open: boolean, newTodoInputChange: any, buttonFunc
 export default App;
 
 export interface Todo {
+    id: number;
     text: string;
     complete: boolean
 }
