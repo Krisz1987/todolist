@@ -1,0 +1,18 @@
+table {
+    border-collapse: collapse;
+    margin: 10px;
+}
+
+tr {
+    border:2px solid rgba(176, 176, 176, 0.5);
+    background: rgba(234, 234, 234, 0.5);
+}
+
+th, td {
+    min-width: 50px;
+    padding: 10px;
+}
+
+button {
+    margin: 10px;
+}
