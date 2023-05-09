@@ -5,20 +5,6 @@ export class DataConnection {
     counter: number = 0;
     todoId: number = 3;
 
-    /*todos: Todo[] = [
-        {
-            text: 'vásárlás',
-            complete: true
-        },
-        {
-            text: 'mosogatás',
-            complete: false
-        },
-        {
-            text: 'főzés',
-            complete: true
-        }
-    ]*/
     todos: Todo[] = [
         {
             id: 1,
@@ -38,23 +24,25 @@ export class DataConnection {
     ];
 
     async getTodoList() {
-        //this.randomError();
+        this.randomError();
         return this.todos;
     }
 
     async addNewTodo(todoText: string) {
-        //this.randomError();
+        this.randomError();
         this.todoId++;
         this.todos.push({id: this.todoId, text: todoText, complete: false});
         console.log(this.todos)
     }
 
-    setTodoToComplete(todoId: number) {
-        this.todos.map((todo) => {
+    async setTodoToComplete(todoId: number) {
+        this.todos.forEach((todo) => {
+
             if (todo.id === todoId) {
                 todo.complete = true;
             }
         })
+        //console.log(this.todos)
     }
 
     private randomError(): void {

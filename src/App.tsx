@@ -1,4 +1,4 @@
-import React, {useState, useEffect, ChangeEvent} from 'react';
+import React, {ChangeEvent, useEffect, useState} from 'react';
 import './App.css';
 import {DataConnection} from "./DataConnection";
 
@@ -11,14 +11,15 @@ function App() {
     const [openModal, setOpenModal] = useState(false);
 
     useEffect(() => {
-        loadTodoList();
+        setTimeout(() => {
+            loadTodoList();
+        }, 3000)
     }, []);
 
-    loadTodoList();
     function loadTodoList(): void {
         dataConnection.getTodoList().then((result: any) => {
-            //setTodoList(result);
-            setTodoList([...todoList, result]);
+            console.log(result)
+            setTodoList([...result]);
             setLoading(false);
         }).catch((error: string) => {
             alert(error)
@@ -31,12 +32,10 @@ function App() {
         setOpenModal(true);
     }
 
-    function closeModal(): void {
-        setOpenModal(false);
-    }
 
     function onSuccessfulSave(): void {
         setOpenModal(false);
+        console.log('onSucces');
         loadTodoList();
     }
 
@@ -50,9 +49,10 @@ function App() {
             /> : <></>
         }
 
+        console.log("todolist", todoList);
         return <div className="App">
             <h2>Todo list</h2>
-            <CheckList todoList={todoList}/>
+            <CheckList todoList={todoList} onSuccessfulSave={onSuccessfulSave}/>
             <Button buttonText={addNewTodoButtonText} onClick={addTodoClick}/>
             {showModal()}
         </div>
@@ -65,34 +65,42 @@ function App() {
     );
 }
 
-export function CheckList(props: { todoList: Todo[] }): JSX.Element {
+export function CheckList(props: { todoList: Todo[], onSuccessfulSave: any }): JSX.Element {
 
     function handleCheckboxActiveState(id: number) {
-        dataConnection.setTodoToComplete(id)
+        dataConnection.setTodoToComplete(id).then(() => {
+            props.onSuccessfulSave()
+        }).catch(error => {
+            alert(error);
+        });
     }
 
     return (
         <>
             <table>
+                <thead>
                 <tr>
                     <th>Kész</th>
                     <th>Feladat</th>
                 </tr>
-                {props.todoList.map(todo => {
+                </thead>
+                {props.todoList.map((todo, index) => {
                     return (
-                        <>
+                        <React.Fragment key={'todo' + index}>
+                            <tbody>
                             <tr>
                                 <td>
                                     <input type="checkbox"
                                            checked={todo.complete}
-                                           onClick={() => handleCheckboxActiveState(todo.id)}
+                                           onChange={() => handleCheckboxActiveState(todo.id)}
                                     />
                                 </td>
                                 <td>
                                     <p>{todo.text}</p>
                                 </td>
                             </tr>
-                        </>
+                            </tbody>
+                        </React.Fragment>
                     )
                 })}
             </table>
@@ -118,15 +126,11 @@ export function Modal(props: { onSuccessfulSave: any }): JSX.Element {
     function okClick() {
         console.log("OK click")
         dataConnection.addNewTodo(inputText).then(() => {
-            {props.onSuccessfulSave()}
+            props.onSuccessfulSave()
         }).catch(error => {
             alert(error);
         });
     }
-
-    /*if (!props.open) {
-        return <></>;
-    }*/
 
     return (
         <div>
